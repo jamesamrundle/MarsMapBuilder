@@ -44,41 +44,60 @@ class ConversionField extends Component {
 
 
 extraUnitField = () =>{
-        if(this.state.addValue===true) {
+        if(this.props.addFieldCount > 0) {
             return (
-                <div className="">
-                    <h5 className={"verify"}> Complete data to {this.props.selectedField} is comprised of</h5>
-                    <h5 className={"verify"}> {this.props.originField} and : </h5>
-                    <br/>
-                    <div>
+                <div className="inline">
+
+                    <button onClick={(e) => this.removeSelection(e)} className="inline fa fa-minus"/>
+
                     <select className="form-control inline inline-grid" id="sel2" name="sellist2" onChange={this.setField}>
                         {conversionUserOptions(this.props.allUserFields)}
                     </select>
-                    <div className={"unit"}>
+                    <div className={"unit inline"}>
 
                         <input  type="radio" name="measure_unit" value={CM} onClick={this.setUnit}/>CM <br/>
                         <input type="radio" name="measure_unit" value={MM} onClick={this.setUnit}/>MM
                     </div>
-                    </div>
+
                 </div>
             )
         }
     }
 
 
-    setField(e){this.setState({field:e.target.value.split(" ")[0] , showConv:true})}
 
-    setUnit(e){this.setState({unit:e.target.value}); console.log("!!",this.state)}
+    setUnit(e){
+        this.setState({unit:e.target.value},
+        this.addConversionValue )   }
+
+    addConversionValue =()=>{
+        this.props.addConversionValue(this.props.selectedField, //adds secondary field w unit to mapValues
+            {field: this.state.field , unit: this.state.unit }) }
 
     toggleAdd = () =>{ this.setState({addValue:!this.state.addValue})}
 
-    submitSelection = () => {
+    setField(e){
+        this.setState({field:e.target.value.split(" ")[0] , showConv:true},
+            this.submitSelection)}
 
-        this.props.addConversionValue(this.props.selectedField,
-            {field: this.state.field , unit: this.state.unit })
+    removeFieldCallBack = () =>{ //if removing secondary field, enables the field and removes data from mapValues
+        this.props.removeFieldCallBack(this.state.field,this.props.selectedField)}
+
+    removeSelection = () =>{console.log("removeselection");
+        this.props.minusField(FORMAT_CONV);
+        this.removeFieldCallBack();
+        this.setState({field:null},)
+    }
+
+
+
+    submitSelection = () => {
+        console.log("alpa",this.props.selectedField , "stateField",this.state.field,"unselecettd",this.getUnselected());
+
+        let{selectedField, multiCallBack} = this.props;
 
         if(this.state.field) {
-            this.props.callBack({selectedField: this.props.selectedField},
+            multiCallBack({selectedField: selectedField},
                 [this.state.field], //because callback fcts expect array for these values
                 FORMAT_CONV,
                 this.getUnselected())
@@ -87,8 +106,8 @@ extraUnitField = () =>{
         this.setState({submittedField : this.state.field})
     }
 
-    showConversion = () => {
-        if(this.state.field){
+   /* showConversion = () => {
+        if(this.state.field && this.state.field !== "NULL"){
             let defaultVal = this.props.allUserFields[this.props.originField].exampleValue;
             let extraVal = this.props.allUserFields[this.state.field].exampleValue;
             extraVal = (extraVal === undefined) ? 0 : extraVal;
@@ -120,7 +139,7 @@ extraUnitField = () =>{
                 )
             }
         }
-    }
+    }*/
 
 
     showButton = () => {
@@ -145,9 +164,12 @@ extraUnitField = () =>{
 
             <div className="fieldElement" >
                 {this.extraUnitField()}
-                {this.showButton()}
-                {this.showConversion()}
-            </div>
+                {/*{this.showButton()}*/}
+                {/*{this.showConversion()}*/}
+                <div className="showMapping">
+                    {/*{this.showConversion()}*/}
+                </div>
+                </div>
 
         );
     }

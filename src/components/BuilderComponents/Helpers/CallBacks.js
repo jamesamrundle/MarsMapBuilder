@@ -4,23 +4,25 @@ import {FORMAT_121, FORMAT_M21} from "./FileHelpers";
 
 export let decoupleOldUserFieldsMapValues=(oldUserFields,currentMapping)=>{
     var editedCurrentMapping=  currentMapping ;
-    var temp = []
-    console.log("uf",oldUserFields)
-    console.log("curr",currentMapping)
-    if(typeof editedCurrentMapping.userValues != "string") {
-        for (var each of editedCurrentMapping.userValues) {
-            console.log(each)
-            if (oldUserFields.indexOf(each) < 0)
-                temp.push(each)
-        }
-    }else {
-        if(oldUserFields.indexOf(currentMapping.userValues) < 0)
-            temp.push(currentMapping.userValues)
-    }
+   if(oldUserFields) {
+       var temp = []
+       console.log("uf", oldUserFields)
+       console.log("curr", currentMapping)
+       if (typeof editedCurrentMapping.userValues != "string") {
+           for (var each of editedCurrentMapping.userValues) {
+               console.log(each)
+               if (oldUserFields.indexOf(each) < 0)
+                   temp.push(each)
+           }
+       } else {
+           if (oldUserFields.indexOf(currentMapping.userValues) < 0)
+               temp.push(currentMapping.userValues)
+       }
 
-    console.log("decoupled",oldUserFields,"now ",temp)
-    return {...editedCurrentMapping, userValues:temp}
-
+       console.log("decoupled", oldUserFields, "now ", temp)
+       return {...editedCurrentMapping, userValues: temp}
+   }
+   else return editedCurrentMapping;
 }
 
 
@@ -50,7 +52,9 @@ export let decoupleOldUserFieldsMapValues=(oldUserFields,currentMapping)=>{
 
 //no statePiece needed
 export let enableUserField=(oldUserField,newFields)=>{
-    console.log("enable field", oldUserField)
+    console.log("enable user field", oldUserField, newFields)
+
+    if (oldUserField === "NULL") return newFields
 
     var temp= newFields
 
@@ -58,7 +62,7 @@ export let enableUserField=(oldUserField,newFields)=>{
         temp[oldUserField].disabled = false;
         delete temp[oldUserField].mappedTo;
 
-    } else {
+    } else if (oldUserField ) {
         console.log("ensuser ruhroh")
         for (var each of oldUserField){
             temp[each].disabled = false;
@@ -97,7 +101,7 @@ export let addToBeMapped=(statePiece,userField,sesarValues,format)=>{
 
     if(sesarValues.selectedField!== null) {
         var temp = {};
-        console.log("mapdebug", statePiece)
+        // console.log("mapdebug", statePiece)
         if (!statePiece[sesarValues.selectedField]) {
 
             temp.userValues = [userField];
@@ -108,9 +112,9 @@ export let addToBeMapped=(statePiece,userField,sesarValues,format)=>{
 
         else {
             temp = statePiece[sesarValues.selectedField];
-            console.log("dastemp", temp)
+            // console.log("dastemp", temp)
             for (var each of userField) {
-                if (temp.userValues.indexOf(each) < 0)
+                    if (temp.userValues.indexOf(each) < 0)
                     temp.userValues = temp.userValues.concat(each);
             }
 
@@ -132,32 +136,55 @@ export let setUserField=(statePiece,userField, sesarValues)=>{
     console.log("set user field", userField, "set mappval", sesarValues);
 
     var temp = {...statePiece} //(this.state.fields[each].mappedTo != null) ? (this.state.fields[userField].mappedTo) : [];
-
+    var XUnit = statePiece[userField]
 
     if (typeof userField != "string") {
+        console.log("not string")
         for (var each of userField) {
 
-            if (sesarValues) {
+            if (sesarValues && each !== "NULL") {
+                console.log("1")
                 temp[each].mappedTo = sesarValues.selectedField;
                 temp[each].disabled = true;
             }
 
-            else {
+
+            else if (!sesarValues && each !== "NULL"){
+                console.log("2")
                 temp[each].disabled = !temp[each].disabled;
                 delete temp[each].mappedTo;
             }
+
+            if (each === "NULL"){console.log("3")}
         }
     }
     else {//is string
+        console.log("is string")
+        console.log(XUnit)
+
         if(sesarValues){
-            temp[userField].mappedTo = sesarValues.selectedField;
-            temp[userField].disabled = true;}
+            if(XUnit.disabled === true) XUnit.disabled = false;
+            console.log("1")
+            console.log(XUnit)
+
+            XUnit.disabled = true;
+            console.log(XUnit)
+            XUnit.mappedTo = sesarValues.selectedField
+            console.log(XUnit)
+    }
+
         else {
+            console.log("2")
             temp[userField].disabled = ! temp[userField].disabled;
             delete temp[userField].mappedTo  ;}
     }
-
-    return temp;
+   let  returnTemp = {...temp,[userField]:XUnit}
+    console.log("set UF debug ",returnTemp);
+  if(userField[0] !== "NULL") {
+      return returnTemp;
+  }
+  else
+      return{...temp}
 }
 
 
@@ -173,3 +200,21 @@ export let removeMapValue = (oldVal,newMapValues)=>{
     return (temp)
 };
 
+export let replaceM21Null =(mapValues,sesarField,selectedValue,index)=>{
+    console.log("ReplaceM21 \n mapValues:",mapValues,"sesarField:",sesarField,"SelectedValues",selectedValue, "index", index)
+    let temp = mapValues;
+    let selectedField =sesarField.selectedField ;
+    temp[selectedField].userValues[index] = selectedValue[0];
+    return temp;
+}
+
+export let removeExtraM21Field = (mapValues,sesarField,selectedValue,index)=>{
+    console.log("RemoveM21 \n mapValues:",mapValues,"sesarField:",sesarField,"SelectedValues",selectedValue,"index:",index)
+    let temp = mapValues;
+
+    if(temp[sesarField].userValues[index] === selectedValue) {
+        temp[sesarField].userValues.splice(index, 1)
+    }
+    else{temp[sesarField].userValues.splice(index,0,"ERROR") }
+    return temp;
+}

@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import "../css/MapBuilder.css"
 import {FORMAT_CONV,FORMAT_DATE,FORMAT_M21 ,FORMAT_121} from "./Helpers/FileHelpers"
 import {toggledUserOptions} from "./Helpers/renderSelectOptions"
+import ExtraM21Field from "./ExtraM21Field"
 
 
 /* Unlike other components where one maps sesar fields to their fields,
@@ -10,67 +11,53 @@ import {toggledUserOptions} from "./Helpers/renderSelectOptions"
 class Multi2One extends Component {
     constructor(props) {
         super(props);
-        this.state={currentFields:null }
+        this.state={currentFields:[] }
     }
 
 
 
-        getUnselected= () =>{
-        let snapShot = this.state.snapShot;
-        let selectedNow = this.state.currentFields;
-        let wasSubmitted = (this.state.submittedFields) ? this.state.submittedFields : null;
-        // console.log("snap",snapShot, "selectedNow",selectedNow)
-        let removeMe = []
-        // if(snapShot!= null) {
-        //     for (var each of snapShot) {
-        //         console.log("each",each)
-        //         if ( selectedNow.indexOf(each) <0 ) removeMe.push(each)
-        //     }
-        // }
-        if(wasSubmitted != null){
-            for (var each of wasSubmitted) {
-                console.log("each",each)
-                if ( selectedNow.indexOf(each) <0 && removeMe.indexOf(each)<0) removeMe.push(each)
-            }
+
+
+    setExtraM21Field = (selectedField, index) =>{
+        console.log("alpa",this.props.selectedField , "selectedField",selectedField);
+
+        this.props.setExtraM21Field(this.props.selectedField,selectedField, index)
+    }
+
+    removeExtraM21Field = (selectedField, index) =>{
+        this.props.removeM21Field(this.props.selectedField,selectedField, index)
+    }
+
+
+    renderExtraFields = () =>{
+           var mapValues;
+            console.log("M21 PROPS",this.props)
+
+        if(this.props.mapValues[this.props.selectedField]) {
+               mapValues = this.props.mapValues[this.props.selectedField].userValues
+
+
+               var retVal = [];
+               if (mapValues) {
+                   for (var i = 1; i < mapValues.length; i++) {
+                       // retVal.push(this.selectField(this.props.allUserFields, mapValues[i], i))
+                       retVal.push(<ExtraM21Field allUserFields ={this.props.allUserFields}
+                                                    mapValues ={mapValues[i]}
+                                                    index ={i}
+                                                    originSesarField = {this.props.selectedField}
+                                                    setExtraM21Field={this.setExtraM21Field}
+                                                    removeM21Field={this.removeExtraM21Field}
+                                                    multiCallBack = {this.props.multiCallBack}
+                                                     />)
+
+                   }
+                   console.log(retVal)
+                   console.log(this.props.fieldCount)
+                   return retVal
+               }
+           }
+            else return
         }
-
-        // console.log("Remove these", removeMe)
-            return removeMe
-    }
-
-
-
-    handleSelects = (e) =>{
-        if(e) {
-            var options = e.target.selectedOptions;
-           // console.log("M21", options);
-            var fields = []
-            Object.entries(options).map( // creates array of selected userFields
-                (each) => {
-                    //console.log("M21", each[1].id);
-                    fields = fields.concat(each[1].id)
-                })
-            this.setState({currentFields: fields})
-        }}
-
-    handleSubmit = () =>{
-
-        this.setState({...this.state,submittedFields:this.state.currentFields})
-
-        this.props.collapseOnFinish();
-
-        this.props.registerExtraFields(this.state.currentFields);
-
-        if(this.state.currentFields) {
-            this.props.callBack({selectedField: this.props.selectedField},
-                this.state.currentFields,
-                FORMAT_M21,
-                this.getUnselected())
-        }
-    }
-
-
-
 
 
 
@@ -89,17 +76,16 @@ class Multi2One extends Component {
         return (
             <div className="fieldElement" onFocus={()=>this.setState({snapShot:this.state.currentFields})} >
                     <span>
-                        <h3>{this.props.selectedField}</h3>
                         <h5 className="subText">{this.displayExample()}</h5>
                     </span>
+                {this.renderExtraFields()}
 
-                <select multiple className="form-control" id="sel2" name="sellist2" onChange={(e)=>this.handleSelects(e)}>
-                    {toggledUserOptions(this.props.allUserFields,this.props.selectedField,this.props.originField)}
-                    </select>
-                <button onClick={()=> this.handleSubmit()}  >Submit</button>
             </div>
         );
     }
 }
-
+/*<select multiple className="form-control" id="sel2" name="sellist2" onChange={(e)=>this.handleSelects(e)}>
+                    {toggledUserOptions(this.props.allUserFields,this.props.selectedField,this.props.originField)}
+                    </select>
+                <button onClick={()=> this.handleSubmit()}  >Submit</button>*/
 export default Multi2One;

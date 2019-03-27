@@ -2,8 +2,7 @@
     display:inline-block !important;
     margin-left:20px;
     margin-right:20px;
-    margin-bottom:20px;
-}
+    }
 .fieldContainer{
 
     width: fit-content;
@@ -47,10 +46,11 @@ fontStyle:italics;
 
 .inline{
     display: inline-block;
-
-
 }
 
+.inline1{
+    display: inline;
+}
 .verify{
     text-align: center;
 }
@@ -76,4 +76,11 @@ fontStyle:italics;
 .modal-dialog{
     max-width: fit-content;
     width:auto;
+}
+
+.showMapping{
+    position:relative;
+    left:750px;
+    bottom:75px;
+    color:lightslategrey
 }
