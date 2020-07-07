@@ -5,7 +5,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "d3-dsv": "^1.0.10",
-    "electron": "^3.0.2",
+    "electron": "^7.2.4",
     "file-saver": "^2.0.0",
     "filesaver": "0.0.13",
     "immutable": "^3.8.2",
